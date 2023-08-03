@@ -13,6 +13,8 @@ NN_LIST = [
     'BASICVSR',
     'ICONVSR',
     'BASICVSRPP',
+    'TTVSR',
+    'PSRT'
 ]
 
 MODEL_LIST = {
@@ -44,12 +46,18 @@ MODEL_LIST = {
     'BASICVSRPP': {
         'Base': 'basicvsr_plus_plus_reds4.pth',
     },
+    'TTVSR': {
+        'Base': 'ttvsr_reds4.pth',
+    },
+    'PSRT': {
+        'Base': 'psrt_reds4.pth',
+    },
 }
 
 
 def print_network(model, model_name):
     num_params = 0
-    for param in model.parameters():
+    for name, param in model.named_parameters():
         num_params += param.numel()
     print('Network [%s] was created. Total number of parameters: %.1f kelo. '
           'To see the architecture, do print(network).'
@@ -103,6 +111,14 @@ def get_model(model_name, factor=4, num_channels=3):
             from .NN.basicvsr_plus_plus import BasicVSRPlusPlusNet
             net = BasicVSRPlusPlusNet()
 
+        elif model_name == 'TTVSR':
+            from .NN.ttvsrnet import TTVSRNet
+            net = TTVSRNet()
+
+        elif model_name == 'PSRT':
+            from .NN.psrt_recurrent_arch import BasicRecurrentSwin
+            net = BasicRecurrentSwin()
+
         else:
             raise NotImplementedError()
 
@@ -131,5 +147,5 @@ def load_model(model_loading_name):
     state_dict_path = os.path.join(MODEL_DIR, MODEL_LIST[model_name][training_name])
     print(f'Loading model {state_dict_path} for {model_name} network.')
     state_dict = torch.load(state_dict_path, map_location='cpu')
-    net.load_state_dict(state_dict)
+    net.load_state_dict(state_dict, strict=False)
     return net
