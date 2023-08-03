@@ -18,6 +18,16 @@ import warnings
 warnings.filterwarnings('ignore')
 os.environ['TF_CPP_MIN_LOG_LEVEL'] = '2'
 
+global m, n
+m, n = [], []
+
+
+def on_EVENT_LBUTTONDOWN(event, x, y, flags, param):
+    if event == cv2.EVENT_LBUTTONDOWN:
+        m.append(x)
+        n.append(y)
+
+
 # 'BASICVSR@Base' : BASICVSRNet
 # 'ICONVSR@Base' : ICONVSRNet
 # 'BASICVSRPP@Base' : BASICVSR_Plus_Plus_Net
@@ -25,17 +35,34 @@ os.environ['TF_CPP_MIN_LOG_LEVEL'] = '2'
 # 'PSRT@Base' : RethinkingAlignment
 model = load_model('PSRT@Base')
 
-window_size = 64  # Define windoes_size of D
-img_lr, img_hr = prepare_clips('./test_clips/')  # Change this image name
+window_size = 16  # Define windoes_size of D
+img_lr, img_hr = prepare_clips('./REDS/')  # Change this image name
 tensor_lrs = PIL2Tensor(img_lr)
 tensor_hrs = PIL2Tensor(img_hr)
 cv2_lr = np.moveaxis(tensor_lrs.numpy(), 0, 2)
 cv2_hr = np.moveaxis(tensor_hrs.numpy(), 0, 2)
 
-w = 920  # The x coordinate of your select patch, 125 as an example
-h = 220  # The y coordinate of your select patch, 160 as an example
-# And check the red box
-# Is your selected patch this one? If not, adjust the `w` and `h`.
+b, c, _, __ = tensor_lrs.shape
+
+frame_index = math.ceil(b / 2) - 1
+
+draw_img = pil_to_cv2(img_hr[frame_index])
+
+cv2.namedWindow("image")
+cv2.setMouseCallback("image", on_EVENT_LBUTTONDOWN)
+cv2.imshow("image", draw_img)
+
+while len(m) == 0 and len(n) == 0:
+    if cv2.getWindowProperty("image",cv2.WND_PROP_VISIBLE)<= 0:
+        break
+    cv2.waitKey(1)
+cv2.destroyAllWindows()
+
+w, h = m[0], n[0]
+cv2.rectangle(draw_img, (w, h), (w + window_size, h + window_size), (0, 0, 255), 2)
+cv2.imshow("image",draw_img)
+cv2.waitKey(0)
+position_pil = cv2_to_pil(draw_img)
 
 sigma = 1.2
 fold = 50
@@ -45,14 +72,6 @@ attr_objective = attribution_objective(attr_grad, h, w, window=window_size)
 gaus_blur_path_func = GaussianBlurPath(sigma, fold, l)
 interpolated_grad_numpy, result_numpy, interpolated_numpy = Path_gradient(tensor_lrs.numpy(), model, attr_objective,
                                                                           gaus_blur_path_func)
-
-b, c, _, __ = tensor_lrs.shape
-
-frame_index = math.ceil(b / 2) - 1
-
-draw_img = pil_to_cv2(img_hr[frame_index])
-cv2.rectangle(draw_img, (w, h), (w + window_size, h + window_size), (0, 0, 255), 2)
-position_pil = cv2_to_pil(draw_img)
 
 for index in range(b):
     grad_numpy, result = saliency_map(interpolated_grad_numpy[index], result_numpy[index])
