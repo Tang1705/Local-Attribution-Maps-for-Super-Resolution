@@ -11,11 +11,9 @@ from SaliencyModel.VSR_BackProp import saliency_map_PG as saliency_map
 from SaliencyModel.VSR_BackProp import GaussianBlurPath
 from SaliencyModel.utils import grad_norm, IG_baseline, interpolation, isotropic_gaussian_kernel
 
-# 'CARN@Base' : CARN
-# 'RCAN@Base' : RCAN
-# 'RRDBNet@Base' : ESRGAN
-# 'RNAN@Base' : RNAN
-# 'SAN@Base' : SAN
+# 'BASICVSR@Base' : BASICVSRNet
+# 'ICONVSR@Base' : ICONVSRNet
+# 'BASICVSRPP@Base' : BASICVSR_Plus_Plus_Net
 model = load_model('BASICVSR@Base')
 
 window_size = 64  # Define windoes_size of D
@@ -31,7 +29,7 @@ h = 220  # The y coordinate of your select patch, 160 as an example
 # Is your selected patch this one? If not, adjust the `w` and `h`.
 
 sigma = 1.2
-fold = 50
+fold = 2
 l = 9
 alpha = 0.5
 attr_objective = attribution_objective(attr_grad, h, w, window=window_size)
@@ -60,5 +58,5 @@ for index in range(b):
          blend_kde_and_input,
          Tensor2PIL(torch.clamp(torch.from_numpy(result), min=0., max=1.))]
     )
-
-    pil.save("./results/vsr/" + str(index) + ".png")
+    pil.show()
+    # pil.save("./results/vsr/" + str(index) + ".png")
