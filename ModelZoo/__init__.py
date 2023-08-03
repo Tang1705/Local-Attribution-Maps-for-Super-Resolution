@@ -9,7 +9,10 @@ NN_LIST = [
     'RRDBNet',
     'RNAN',
     'SAN',
-    'BASICVSR'
+    'EDVR',
+    'BASICVSR',
+    'ICONVSR',
+    'BASICVSRPP',
 ]
 
 MODEL_LIST = {
@@ -28,8 +31,18 @@ MODEL_LIST = {
     'RNAN': {
         'Base': 'RNAN_SR_F64G10P48BIX4.pt',
     },
+
+    'EDVR': {
+        'Base': 'edvr_reds4.pth',
+    },
     'BASICVSR': {
         'Base': 'basicvsr_reds4.pth',
+    },
+    'ICONVSR': {
+        'Base': 'iconvsr_reds4.pth',
+    },
+    'BASICVSRPP': {
+        'Base': 'basicvsr_plus_plus_reds4.pth',
     },
 }
 
@@ -74,9 +87,22 @@ def get_model(model_name, factor=4, num_channels=3):
             from .NN.rnan import RNAN
             net = RNAN(factor=factor, num_channels=num_channels)
 
+        elif model_name == 'EDVR':
+            from .NN.edvr_net import EDVRNet
+            net = EDVRNet(in_channels=3, out_channels=3)
+
         elif model_name == 'BASICVSR':
-            from .NN.basicvsr import BasicVSRNet
+            from .NN.basicvsr_net import BasicVSRNet
             net = BasicVSRNet()
+
+        elif model_name == 'ICONVSR':
+            from .NN.iconvsr_net import IconVSRNet
+            net = IconVSRNet()
+
+        elif model_name == 'BASICVSRPP':
+            from .NN.basicvsr_plus_plus import BasicVSRPlusPlusNet
+            net = BasicVSRPlusPlusNet()
+
         else:
             raise NotImplementedError()
 
