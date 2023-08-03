@@ -1,3 +1,5 @@
+import math
+
 import torch, cv2, os, sys, numpy as np, matplotlib.pyplot as plt
 from PIL import Image
 from ModelZoo.utils import load_as_tensor, Tensor2PIL, PIL2Tensor, _add_batch_one
@@ -11,10 +13,17 @@ from SaliencyModel.VSR_BackProp import saliency_map_PG as saliency_map
 from SaliencyModel.VSR_BackProp import GaussianBlurPath
 from SaliencyModel.utils import grad_norm, IG_baseline, interpolation, isotropic_gaussian_kernel
 
+import warnings
+
+warnings.filterwarnings('ignore')
+os.environ['TF_CPP_MIN_LOG_LEVEL'] = '2'
+
 # 'BASICVSR@Base' : BASICVSRNet
 # 'ICONVSR@Base' : ICONVSRNet
 # 'BASICVSRPP@Base' : BASICVSR_Plus_Plus_Net
-model = load_model('BASICVSR@Base')
+# 'TTVSR@Base' : TTVSRNet
+# 'PSRT@Base' : RethinkingAlignment
+model = load_model('PSRT@Base')
 
 window_size = 64  # Define windoes_size of D
 img_lr, img_hr = prepare_clips('./test_clips/')  # Change this image name
@@ -29,7 +38,7 @@ h = 220  # The y coordinate of your select patch, 160 as an example
 # Is your selected patch this one? If not, adjust the `w` and `h`.
 
 sigma = 1.2
-fold = 2
+fold = 50
 l = 9
 alpha = 0.5
 attr_objective = attribution_objective(attr_grad, h, w, window=window_size)
@@ -37,11 +46,14 @@ gaus_blur_path_func = GaussianBlurPath(sigma, fold, l)
 interpolated_grad_numpy, result_numpy, interpolated_numpy = Path_gradient(tensor_lrs.numpy(), model, attr_objective,
                                                                           gaus_blur_path_func)
 
-draw_img = pil_to_cv2(img_hr[2])
+b, c, _, __ = tensor_lrs.shape
+
+frame_index = math.ceil(b / 2) - 1
+
+draw_img = pil_to_cv2(img_hr[frame_index])
 cv2.rectangle(draw_img, (w, h), (w + window_size, h + window_size), (0, 0, 255), 2)
 position_pil = cv2_to_pil(draw_img)
 
-b, c, _, __ = tensor_lrs.shape
 for index in range(b):
     grad_numpy, result = saliency_map(interpolated_grad_numpy[index], result_numpy[index])
     abs_normed_grad_numpy = grad_abs_norm(grad_numpy)

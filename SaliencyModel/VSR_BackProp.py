@@ -5,6 +5,7 @@ from ModelZoo.utils import _add_batch_one, _remove_batch
 from SaliencyModel.utils import grad_norm, IG_baseline, interpolation, isotropic_gaussian_kernel
 from tqdm import tqdm
 
+
 def attribution_objective(attr_func, h, w, window=16):
     def calculate_objective(image):
         return attr_func(image, h, w, window=window)
