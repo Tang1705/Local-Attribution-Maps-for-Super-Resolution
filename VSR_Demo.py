@@ -53,15 +53,16 @@ cv2.setMouseCallback("image", on_EVENT_LBUTTONDOWN)
 cv2.imshow("image", draw_img)
 
 while len(m) == 0 and len(n) == 0:
-    if cv2.getWindowProperty("image",cv2.WND_PROP_VISIBLE)<= 0:
+    if cv2.getWindowProperty("image", cv2.WND_PROP_VISIBLE) <= 0:
         break
     cv2.waitKey(1)
-cv2.destroyAllWindows()
 
 w, h = m[0], n[0]
 cv2.rectangle(draw_img, (w, h), (w + window_size, h + window_size), (0, 0, 255), 2)
-cv2.imshow("image",draw_img)
+cv2.imshow("image", draw_img)
 cv2.waitKey(0)
+cv2.destroyAllWindows()
+cv2.waitKey(1)
 position_pil = cv2_to_pil(draw_img)
 
 sigma = 1.2
