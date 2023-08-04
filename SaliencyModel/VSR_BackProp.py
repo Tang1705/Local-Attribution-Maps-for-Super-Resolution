@@ -91,34 +91,32 @@ def Path_gradient(numpy_image, model, attr_objective, path_interpolation_func, c
         This function return pil_numpy_images
     :return:
     """
-    with torch.no_grad():
-        model.eval()
+    if cuda:
+        model = model.cuda()
+    cv_numpy_image = np.moveaxis(numpy_image, 1, 3)
+    image_interpolation, lambda_derivative_interpolation = path_interpolation_func(cv_numpy_image)
+    grad_accumulate_list = np.zeros_like(image_interpolation)
+    result_list = []
+    for i in tqdm(range(image_interpolation.shape[0])):
+        img_tensor = torch.from_numpy(image_interpolation[i])
+        img_tensor.requires_grad_(True)
         if cuda:
-            model = model.cuda()
-        cv_numpy_image = np.moveaxis(numpy_image, 1, 3)
-        image_interpolation, lambda_derivative_interpolation = path_interpolation_func(cv_numpy_image)
-        grad_accumulate_list = np.zeros_like(image_interpolation)
-        result_list = []
-        for i in tqdm(range(image_interpolation.shape[0])):
-            img_tensor = torch.from_numpy(image_interpolation[i])
-            img_tensor.requires_grad_(True)
-            if cuda:
-                result = model(_add_batch_one(img_tensor).cuda())[0]
-                target = attr_objective(result)
-                target.backward()
-                grad = img_tensor.grad.cpu().numpy()
-                if np.any(np.isnan(grad)):
-                    grad[np.isnan(grad)] = 0.0
-            else:
-                result = model(_add_batch_one(img_tensor))[0]
-                target = attr_objective(result)
-                target.backward()
-                grad = img_tensor.grad.numpy()
-                if np.any(np.isnan(grad)):
-                    grad[np.isnan(grad)] = 0.0
+            result = model(_add_batch_one(img_tensor).cuda())[0]
+            target = attr_objective(result)
+            target.backward()
+            grad = img_tensor.grad.cpu().numpy()
+            if np.any(np.isnan(grad)):
+                grad[np.isnan(grad)] = 0.0
+        else:
+            result = model(_add_batch_one(img_tensor))[0]
+            target = attr_objective(result)
+            target.backward()
+            grad = img_tensor.grad.numpy()
+            if np.any(np.isnan(grad)):
+                grad[np.isnan(grad)] = 0.0
 
-            grad_accumulate_list[i] = grad * lambda_derivative_interpolation[i]
-            result_list.append(result.detach().numpy())
+        grad_accumulate_list[i] = grad * lambda_derivative_interpolation[i]
+        result_list.append(result.detach().numpy())
     results_numpy = np.asarray(result_list)
     return np.moveaxis(grad_accumulate_list, 1, 0), np.moveaxis(results_numpy, 1, 0), np.moveaxis(image_interpolation,
                                                                                                   1, 0)
