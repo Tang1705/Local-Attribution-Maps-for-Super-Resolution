@@ -84,7 +84,7 @@ def LinearPath(fold):
     return path_interpolation_func
 
 
-def Path_gradient(numpy_image, model, attr_objective, path_interpolation_func, cuda=False):
+def Path_gradient(numpy_image, model, attr_objective, path_interpolation_func, frame_index, cuda=False):
     """
     :param path_interpolation_func:
         return \lambda(\alpha) and d\lambda(\alpha)/d\alpha, for \alpha\in[0, 1]
@@ -102,14 +102,14 @@ def Path_gradient(numpy_image, model, attr_objective, path_interpolation_func, c
         img_tensor.requires_grad_(True)
         if cuda:
             result = model(_add_batch_one(img_tensor).cuda())[0]
-            target = attr_objective(result)
+            target = attr_objective(result[frame_index].unsqueeze(0))
             target.backward()
             grad = img_tensor.grad.cpu().numpy()
             if np.any(np.isnan(grad)):
                 grad[np.isnan(grad)] = 0.0
         else:
             result = model(_add_batch_one(img_tensor))[0]
-            target = attr_objective(result)
+            target = attr_objective(result[frame_index].unsqueeze(0))
             target.backward()
             grad = img_tensor.grad.numpy()
             if np.any(np.isnan(grad)):
