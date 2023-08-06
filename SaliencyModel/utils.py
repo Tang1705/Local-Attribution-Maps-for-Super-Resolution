@@ -126,7 +126,7 @@ def click_select_position(pil_img, window_size=16):
             position[1] = y
             draw_img = cv2_img.copy()
             cv2.rectangle(draw_img, (x, y), (x + window_size, y + window_size), (0, 0, 255), 2)
-            cv2.putText(draw_img, xy, (x, y), cv2.FONT_HERSHEY_PLAIN, 1.0, (255, 255, 255), thickness=1)
+            # cv2.putText(draw_img, xy, (x, y), cv2.FONT_HERSHEY_PLAIN, 1.0, (255, 255, 255), thickness=1)
             cv2.imshow("image", draw_img)
 
     cv2.namedWindow("image")
@@ -136,6 +136,7 @@ def click_select_position(pil_img, window_size=16):
 
     cv2.waitKey(0)
     cv2.destroyAllWindows()
+    cv2.waitKey(1)
     return_img = cv2_img.copy()
     cv2.rectangle(return_img, (position[0], position[1]), (position[0] + window_size, position[1] + window_size),
                   (0, 0, 255), 2)

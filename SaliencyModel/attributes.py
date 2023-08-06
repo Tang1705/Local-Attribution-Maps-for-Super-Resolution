@@ -62,5 +62,3 @@ def attr_gabor_generator(gabor_filter):
         crop = after_filter[:, :, h: h + window, w: w + window]
         return reduce_func(reduce)(crop)
     return attr_gabor
-
-

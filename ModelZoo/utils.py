@@ -165,3 +165,11 @@ def _remove_batch(tensor):
 def mod_crop(tensor, scale=4):
     B, C, H, W = tensor.shape
     return tensor[:, :, :H - H % scale, :W - W % scale]
+
+def print_network(model, model_name):
+    num_params = 0
+    for name, param in model.named_parameters():
+        num_params += param.numel()
+    print('Network [%s] was created. Total number of parameters: %.1f kelo. '
+          'To see the architecture, do print(network).'
+          % (model_name, num_params / 1000))
