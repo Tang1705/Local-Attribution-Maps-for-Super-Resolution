@@ -1,25 +1,25 @@
-import torch, cv2, os, sys, numpy as np, matplotlib.pyplot as plt
-from PIL import Image
-from ModelZoo.utils import load_as_tensor, Tensor2PIL, PIL2Tensor, _add_batch_one
-from ModelZoo import get_model, load_model, print_network
-from SaliencyModel.utils import vis_saliency, vis_saliency_kde, click_select_position, grad_abs_norm, grad_norm, \
-    prepare_images, make_pil_grid, blend_input
-from SaliencyModel.utils import cv2_to_pil, pil_to_cv2, gini
-from SaliencyModel.attributes import attr_grad
-from SaliencyModel.SISR_BackProp import I_gradient, attribution_objective, Path_gradient
-from SaliencyModel.SISR_BackProp import saliency_map_PG as saliency_map
+import cv2
+import torch
+import numpy as np
+
+from ModelZoo import load_model
+from ModelZoo.utils import Tensor2PIL, PIL2Tensor
 from SaliencyModel.SISR_BackProp import GaussianBlurPath
-from SaliencyModel.utils import grad_norm, IG_baseline, interpolation, isotropic_gaussian_kernel
+from SaliencyModel.SISR_BackProp import attribution_objective, Path_gradient
+from SaliencyModel.SISR_BackProp import saliency_map_PG as saliency_map
+from SaliencyModel.attributes import attr_grad
+from SaliencyModel.utils import cv2_to_pil, pil_to_cv2
+from SaliencyModel.utils import vis_saliency, vis_saliency_kde, grad_abs_norm, prepare_images, make_pil_grid
 
 # 'CARN@Base' : CARN
 # 'RCAN@Base' : RCAN
 # 'RRDBNet@Base' : ESRGAN
 # 'RNAN@Base' : RNAN
 # 'SAN@Base' : SAN
-model = load_model('CARN@Base')
+model = load_model('SAN@Base')
 
 window_size = 16  # Define windoes_size of D
-img_lr, img_hr = prepare_images('./test_images/7.png')  # Change this image name
+img_lr, img_hr = prepare_images('resources/test_images/7.png')  # Change this image name
 tensor_lr = PIL2Tensor(img_lr)[:3]
 tensor_hr = PIL2Tensor(img_hr)[:3]
 cv2_lr = np.moveaxis(tensor_lr.numpy(), 0, 2)
@@ -58,4 +58,4 @@ pil = make_pil_grid(
      Tensor2PIL(torch.clamp(torch.from_numpy(result), min=0., max=1.))]
 )
 
-pil.show()
+pil.save("./results/sisr/7.png")
