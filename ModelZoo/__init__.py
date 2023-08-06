@@ -1,5 +1,5 @@
-from sr_backbones import sisr
-from sr_backbones import vsr
+from .sr_backbones import sisr
+from .sr_backbones import vsr
 
 
 def load_model(model_loading_name):
@@ -18,6 +18,6 @@ def load_model(model_loading_name):
         raise NotImplementedError()
     assert model_name in sisr.MODEL_LIST or model_name in vsr.MODEL_LIST, 'check your model name before @'
     if model_name in sisr.MODEL_LIST:
-        return sisr.load_model(model_loading_name)
+        return sisr.load_model(model_name,training_name)
     else:
-        return vsr.load_model(model_loading_name)
+        return vsr.load_model(model_name,training_name)

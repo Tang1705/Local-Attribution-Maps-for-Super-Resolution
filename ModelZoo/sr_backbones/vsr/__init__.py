@@ -12,7 +12,8 @@ MODEL_LIST = [
     'VRT',
     'TTVSR',
     'RVRT',
-    'PSRT'
+    'PSRT',
+    'SemanticLens'
 ]
 
 MODEL_DICT = {
@@ -40,6 +41,10 @@ MODEL_DICT = {
     'PSRT': {
         'Base': 'psrt_reds4.pth',
     },
+    'SemanticLens': {
+        'Base': 'Base VSR BI.pth',
+        'Full': 'Semantic Lens.pth'
+    }
 }
 
 
@@ -92,6 +97,10 @@ def get_model(model_name, factor=4, num_channels=3):
         elif model_name == 'PSRT':
             from .psrt_recurrent_arch import BasicRecurrentSwin
             net = BasicRecurrentSwin()
+
+        elif model_name == "SemanticLens":
+            from ModelZoo.sr_backbones.semantic_lens.super_resolution import VISR
+            net = VISR()
 
         else:
             raise NotImplementedError()
